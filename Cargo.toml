@@ -1,0 +1,21 @@
+[package]
+name = "etcdio-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "etcdio_rs"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+#
+# Downstream Rust code (including code in `bin/`, `examples/`, and `tests/`) will not be able
+# to `use string_sum;` unless the "rlib" or "lib" crate type is also included, e.g.:
+# crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+
+# Cargo.toml dependencies
+[dependencies]
+etcd-client = "0.10"
+pyo3 = { version = "0.17", features = ["extension-module"] }
+pyo3-asyncio = { version = "0.17", features = ["tokio-runtime"] }
+tokio = "1.9"
