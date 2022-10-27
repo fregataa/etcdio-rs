@@ -369,30 +369,42 @@ impl Txn{
     }
 
     fn when<'p>(
-        &mut self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         cmps: Vec<Compare>,
-    ) -> PyResult<Py<Txn>> {
-        self.when_cmps = Some(cmps);
-        Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<Txn> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.when_cmps = Some(cmps);
+        Ok(())
+        // self.when_cmps = Some(cmps);
+        // Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
     }
 
     fn and_then<'p>(
-        &mut self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         ops: Vec<TxnOp>,
-    ) -> PyResult<Py<Txn>> {
-        self.and_then_ops = Some(ops);
-        Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<Txn> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.and_then_ops = Some(ops);
+        Ok(())
+        // self.and_then_ops = Some(ops);
+        // Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
     }
 
     fn or_else<'p>(
-        &mut self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         ops: Vec<TxnOp>,
-    ) -> PyResult<Py<Txn>> {
-        self.or_else_ops = Some(ops);
-        Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<Txn> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.or_else_ops = Some(ops);
+        Ok(())
+        // self.or_else_ops = Some(ops);
+        // Ok(Python::with_gil(|py| Py::new(py, *self).unwrap()))
     }
 }
 
