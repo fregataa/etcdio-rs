@@ -103,21 +103,19 @@ impl EtcdClient {
         })
     }
 
-    // fn txn<'p>(
-    //     &self,
-    //     py: Python<'p>,
-    //     when: &str,
-    //     and_then: &str,
-    //     or_else: &str,
-    // ) -> PyResult<&'p PyAny> {
-    //     let txn = Txn::new();
-    //     let addr = self.address.to_string();
-    //     pyo3_asyncio::tokio::future_into_py(py, async move {
-    //         let mut conn = Client::connect([addr], None).await.unwrap();
-    //         let resp = conn.txn(txn).await.unwrap();
-    //         Ok(resp.succeeded())
-    //     })
-    // }
+    fn txn<'p>(
+        &self,
+        py: Python<'p>,
+        txn: Txn,
+    ) -> PyResult<&'p PyAny> {
+        let addr = self.address.to_string();
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let mut conn = Client::connect([addr], None).await.unwrap();
+            let resp = conn.txn(serialize_txn(&txn)).await.unwrap();
+            // TODO: How to collect the aggregate responses of txn?
+            Ok(resp.succeeded())
+        })
+    }
 }
 
 #[derive(Clone, Copy)]
