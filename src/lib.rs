@@ -170,13 +170,13 @@ impl Compare{
     #[new]
     fn new(
         key: &str,
-        cmp: CompareOp,
+        cmp_op: CompareOp,
         target: &str,
         target_union: TargetUnion,
     ) -> Self {
         Compare{
             key: key.to_string(),
-            compare_op: cmp,
+            compare_op: cmp_op,
             target: target.to_string(),
             target_union: target_union,
             range_end: None,
@@ -185,33 +185,40 @@ impl Compare{
     }
 
     fn with_range<'p>(
-        &self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         end: &str,
-    ) -> PyResult<Py<Compare>> {
-        Ok(Python::with_gil(|py| Py::new(py, Compare{
-            key: self.key.to_string(),
-            compare_op: self.compare_op,
-            target: self.target.to_string(),
-            target_union: self.target_union,
-            range_end: Some(end.to_string()),
-            is_prefix: false,
-        }).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<Compare> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.range_end = Some(end.to_string());
+        Ok(())
+        // Ok(Python::with_gil(|py| Py::new(py, Compare{
+        //     key: self.key.to_string(),
+        //     compare_op: self.compare_op,
+        //     target: self.target.to_string(),
+        //     target_union: self.target_union,
+        //     range_end: Some(end.to_string()),
+        //     is_prefix: false,
+        // }).unwrap()))
     }
 
     fn with_prefix<'p>(
-        &self,
-        _py: Python<'p>,
-    ) -> PyResult<Py<Compare>> {
-        let end = self.get_prefix(&self.key.to_string());
-        Ok(Python::with_gil(|py| Py::new(py, Compare{
-            key: self.key.to_string(),
-            compare_op: self.compare_op,
-            target: self.target.to_string(),
-            target_union: self.target_union,
-            range_end: Some(end),
-            is_prefix: true,
-        }).unwrap()))
+        this: Py<Self>,
+        py: Python,
+    ) -> PyResult<()> {
+        let cell: &PyCell<Compare> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.range_end = Some(slf.get_prefix(&slf.key.to_string()));
+        Ok(())
+        // Ok(Python::with_gil(|py| Py::new(py, Compare{
+        //     key: self.key.to_string(),
+        //     compare_op: self.compare_op,
+        //     target: self.target.to_string(),
+        //     target_union: self.target_union,
+        //     range_end: Some(end),
+        //     is_prefix: true,
+        // }).unwrap()))
     }
 }
 
@@ -268,60 +275,79 @@ impl TxnOp{
     }
 
     fn put<'p>(
-        &self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         key: &str,
         value: &str,
-    ) -> PyResult<Py<TxnOp>> {
-        let key = key.to_string();
-        let value = value.to_string();
-        Ok(Python::with_gil(|py| Py::new(py, TxnOp{
-            key: Some(key),
-            value: Some(value),
-            txn: None,
-            op: Some(TxnOpEnum::Put),
-        }).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<TxnOp> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.key = Some(key.to_string());
+        slf.value = Some(value.to_string());
+        slf.op = Some(TxnOpEnum::Put);
+        Ok(())
+        // Ok(Python::with_gil(|py| Py::new(py, TxnOp{
+        //     key: Some(key),
+        //     value: Some(value),
+        //     txn: None,
+        //     op: Some(TxnOpEnum::Put),
+        // }).unwrap()))
     }
 
     fn get<'p>(
-        &self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         key: &str,
-    ) -> PyResult<Py<TxnOp>> {
-        let key = key.to_string();
-        Ok(Python::with_gil(|py| Py::new(py, TxnOp{
-            key: Some(key),
-            value: None,
-            txn: None,
-            op: Some(TxnOpEnum::Get),
-        }).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<TxnOp> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.key = Some(key.to_string());
+        slf.op = Some(TxnOpEnum::Get);
+        Ok(())
+        // let key = key.to_string();
+        // Ok(Python::with_gil(|py| Py::new(py, TxnOp{
+        //     key: Some(key),
+        //     value: None,
+        //     txn: None,
+        //     op: Some(TxnOpEnum::Get),
+        // }).unwrap()))
     }
 
     fn delete<'p>(
-        &self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         key: &str,
-    ) -> PyResult<Py<TxnOp>> {
-        let key = key.to_string();
-        Ok(Python::with_gil(|py| Py::new(py, TxnOp{
-            key: Some(key),
-            value: None,
-            txn: None,
-            op: Some(TxnOpEnum::Delete),
-        }).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<TxnOp> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.key = Some(key.to_string());
+        slf.op = Some(TxnOpEnum::Delete);
+        Ok(())
+        // let key = key.to_string();
+        // Ok(Python::with_gil(|py| Py::new(py, TxnOp{
+        //     key: Some(key),
+        //     value: None,
+        //     txn: None,
+        //     op: Some(TxnOpEnum::Delete),
+        // }).unwrap()))
     }
 
     fn txn<'p>(
-        &self,
-        _py: Python<'p>,
+        this: Py<Self>,
+        py: Python,
         txn: Txn,
-    ) -> PyResult<Py<TxnOp>> {
-        Ok(Python::with_gil(|py| Py::new(py, TxnOp{
-            key: None,
-            value: None,
-            txn: Some(txn),
-            op: Some(TxnOpEnum::Txn),
-        }).unwrap()))
+    ) -> PyResult<()> {
+        let cell: &PyCell<TxnOp> = this.as_ref(py);
+        let mut slf = cell.try_borrow_mut().unwrap();
+        slf.txn = Some(txn);
+        slf.op = Some(TxnOpEnum::Txn);
+        Ok(())
+        // Ok(Python::with_gil(|py| Py::new(py, TxnOp{
+        //     key: None,
+        //     value: None,
+        //     txn: Some(txn),
+        //     op: Some(TxnOpEnum::Txn),
+        // }).unwrap()))
     }
 }
 
